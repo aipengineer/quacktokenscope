@@ -91,12 +91,20 @@ class TokenScopePlugin(QuackToolPluginProtocol):
             self._initialize_environment()
 
             # Initialize Google Drive integration
-            self._drive_service = GoogleDriveService()
-            drive_result = self._drive_service.initialize()
-            if not drive_result.success:
-                return IntegrationResult.error_result(
-                    f"Failed to initialize Google Drive: {drive_result.error}"
-                )
+            try:
+                self._drive_service = GoogleDriveService()
+                drive_result = self._drive_service.initialize()
+                if not drive_result.success:
+                    self.logger.warning(
+                        f"Google Drive integration not available: {drive_result.error}")
+                    self.logger.info(
+                        "QuackTokenScope will continue without Google Drive functionality")
+                    self._drive_service = None
+            except Exception as e:
+                self.logger.warning(f"Failed to initialize Google Drive: {e}")
+                self.logger.info(
+                    "QuackTokenScope will continue without Google Drive functionality")
+                self._drive_service = None
 
             # Initialize tokenizers
             tokenizers_to_load = ["tiktoken", "huggingface", "sentencepiece"]
@@ -200,10 +208,21 @@ class TokenScopePlugin(QuackToolPluginProtocol):
 
         try:
             # Check if the file_path is a Google Drive ID
-            is_drive_id = not os.path.exists(file_path) and "/" not in file_path
+            is_drive_id = not os.path.exists(
+                file_path) and "/" not in file_path and "\\" not in file_path
 
-            if is_drive_id:
-                file_result = self._process_drive_file(file_path, output_path, options)
+            # Only process as a Drive ID if we have Drive service and it's a likely Drive ID
+            # Google Drive IDs are typically 33 characters long and consist of letters, numbers, hyphens, and underscores
+            if is_drive_id and len(file_path) >= 25 and len(file_path) <= 40:
+                if self._drive_service:
+                    file_result = self._process_drive_file(file_path, output_path,
+                                                           options)
+                else:
+                    auth_url = "https://developers.google.com/drive/api/quickstart/python"
+                    return IntegrationResult.error_result(
+                        f"The file path appears to be a Google Drive ID, but Google Drive integration is not available. "
+                        f"To use Google Drive features, please follow the setup instructions at {auth_url}"
+                    )
             else:
                 file_result = self._process_local_file(file_path, output_path, options)
 
@@ -232,6 +251,18 @@ class TokenScopePlugin(QuackToolPluginProtocol):
         Returns:
             IntegrationResult containing the token analysis result
         """
+        # Check if Google Drive service is available
+        if not self._drive_service:
+            auth_url = "https://developers.google.com/drive/api/quickstart/python"
+            self.logger.error(
+                f"Google Drive integration is not available. To process Google Drive files, "
+                f"please configure Google Drive credentials in your quack_config.yaml"
+            )
+            return IntegrationResult.error_result(
+                f"Google Drive integration is not available. To use Google Drive features, "
+                f"please follow the setup instructions at {auth_url}"
+            )
+
         # Download the file from Google Drive
         self.logger.info(f"Downloading file from Google Drive with ID: {file_id}")
 
@@ -262,7 +293,7 @@ class TokenScopePlugin(QuackToolPluginProtocol):
         result = self._process_local_file(local_path, output_path, options)
 
         if result.success and options.get("upload", True) and not options.get("dry_run",
-                                                                              False):
+                                                                              False) and self._drive_service:
             # Upload the result back to Google Drive
             exported_files = result.content.get("exported_files", {})
 

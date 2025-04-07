@@ -6,7 +6,7 @@ Tokenizer implementations package for QuackTokenScope.
 from quacktokenscope.utils.tokenizers.base import BaseTokenizer, MockTokenizer
 from quacktokenscope.utils.tokenizers.tiktoken_tokenizer import TiktokenTokenizer
 from quacktokenscope.utils.tokenizers.huggingface_tokenizer import HuggingFaceTokenizer
-from quacktokenscope.utils.tokenizers.sentencepiece_tokenizer import SentencePieceTokenizer
+#from quacktokenscope.utils.tokenizers.sentencepiece_tokenizer import SentencePieceTokenizer
 
 # Dictionary mapping tokenizer names to their classes
 TOKENIZER_REGISTRY = {

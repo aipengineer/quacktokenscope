@@ -7,7 +7,6 @@ using Google's SentencePiece library.
 """
 
 import logging
-import os
 from pathlib import Path
 from typing import ClassVar
 
