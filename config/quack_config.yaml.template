@@ -1,17 +1,18 @@
-# QuackMetadata Configuration
+# QuackTokenScope Configuration
 
 general:
-  project_name: QuackMetadata
+  project_name: QuackTokenScope
 
 logging:
   level: INFO
-  file: logs/quackmetadata.log
+  file: logs/quacktokenscope.log
   console: true
 
 paths:
   base_dir: ./
   output_dir: ./output
   temp_dir: ./temp
+  logs_dir: ./logs
 
 integrations:
   google:
@@ -36,7 +37,14 @@ integrations:
     retry_count: 3
 
 custom:
-  quackmetadata:
-    default_prompt_template: generic
-    max_retries: 3
-    output_format: json
+  quacktokenscope:
+    log_level: INFO
+    output_dir: ./output
+    temp_dir: ./temp
+    default_tokenizers:
+      - tiktoken
+      - huggingface
+      #- sentencepiece
+    output_format: excel
+    max_tokens_to_display: 10
+    use_mock_tokenizers: false  # Set to true for testing without actual tokenizer dependencies

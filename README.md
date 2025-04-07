@@ -1,8 +1,3 @@
-Absolutely! Here's a polished and community-ready `README.md` for the `QuackTokenScope` public repository, balancing a fun tone with technical clarity.
-
----
-
-```markdown
 # 🧙‍♂️ QuackTokenScope
 
 **Token wizards unite!**  
@@ -42,6 +37,11 @@ FUTURE: Or with pip (once released on PyPI):
 
 ```bash
 pip install quacktokenscope
+```
+
+Sentencepiece requires cmake
+```bash
+brew install cmake
 ```
 
 ---
@@ -182,9 +182,3 @@ Open an issue or submit a pull request if you'd like to improve the tokenizer ad
 ## 💬 Questions?
 
 Tweet at [@aipengineer](https://twitter.com/aipengineer) or file an issue on GitHub!
-
-```
-
----
-
-Let me know if you'd like this auto-populated with badges (e.g., PyPI, Tests, License), or if we should also generate a smaller `examples/` folder for sample inputs and outputs.
