@@ -6,10 +6,10 @@ This module provides an implementation of the BaseTokenizer interface
 using Google's SentencePiece library.
 """
 
-import logging
 from pathlib import Path
 from typing import ClassVar
 
+from quacktokenscope import get_logger
 from quacktokenscope.utils.tokenizers.base import BaseTokenizer
 
 
@@ -32,7 +32,7 @@ class SentencePieceTokenizer(BaseTokenizer):
         super().__init__()
         self._tokenizer = None
         self._temp_dir = None
-        self._logger = logging.getLogger(f"quacktokenscope.tokenizers.{self.name}")
+        self._logger = get_logger(f"quacktokenscope.tokenizers.{self.name}")
 
     def initialize(self) -> bool:
         """

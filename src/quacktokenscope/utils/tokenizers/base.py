@@ -6,10 +6,13 @@ This module defines the base tokenizer interface that all concrete tokenizer
 implementations must follow.
 """
 
-import logging
+
 from abc import ABC, abstractmethod
 from collections import Counter
+from logging import Logger
 from typing import ClassVar
+
+from quacktokenscope import get_logger
 
 
 class BaseTokenizer(ABC):
@@ -29,11 +32,11 @@ class BaseTokenizer(ABC):
 
     def __init__(self) -> None:
         """Initialize the tokenizer."""
-        self._logger = logging.getLogger(f"quacktokenscope.tokenizers.{self.name}")
+        self._logger = get_logger("quacktokenscope.tokenizers.{self.name}")
         self._initialized = False
 
     @property
-    def logger(self) -> logging.Logger:
+    def logger(self) -> Logger:
         """Get the logger for this tokenizer."""
         return self._logger
 
