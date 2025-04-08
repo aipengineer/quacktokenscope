@@ -6,10 +6,12 @@ This module handles environment setup and other initialization tasks
 that should be performed when the application starts.
 """
 
-import logging
+
 from pathlib import Path
 
-logger = logging.getLogger(__name__)
+from quackcore.logging import get_logger
+
+logger = get_logger(__name__)
 
 # Import version directly - this is a simple import that won't cause circular dependencies
 from quacktokenscope.version import __version__

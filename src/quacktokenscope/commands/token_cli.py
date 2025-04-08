@@ -6,8 +6,6 @@ This module provides a CLI for the QuackTokenScope tool, allowing users
 to analyze text files with different tokenizers and interact with Google Drive.
 """
 
-import json
-from pathlib import Path
 from typing import cast
 
 import click
@@ -90,6 +88,11 @@ tokenscope_cli = cast(click.Group, tokenscope_cli)
     type=click.Path(file_okay=False),
 )
 @click.option(
+    "--same-dir",
+    is_flag=True,
+    help="Output results in the same directory as the input file",
+)
+@click.option(
     "--tokenizers",
     help="Comma-separated list of tokenizers to use (tiktoken, huggingface, sentencepiece)",
     type=str,
@@ -126,6 +129,7 @@ def tokenize_command(
         ctx: click.Context,
         input: str,
         output: str | None,
+        same_dir: bool,
         tokenizers: str | None,
         output_format: str,
         limit: int | None,
@@ -140,6 +144,7 @@ def tokenize_command(
 
     Examples:
         quacktool tokenscope tokenize myfile.txt
+        quacktool tokenscope tokenize myfile.txt --same-dir
         quacktool tokenscope tokenize 1abc2defg3hij --dry-run
     """
     logger = ctx.obj["logger"]
@@ -168,7 +173,8 @@ def tokenize_command(
         "output_format": output_format,
         "upload": upload,
         "dry_run": dry_run,
-        "verbose": verbose
+        "verbose": verbose,
+        "same_dir": same_dir
     }
 
     if limit:

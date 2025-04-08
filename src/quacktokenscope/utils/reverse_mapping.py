@@ -6,11 +6,11 @@ This module provides functions for evaluating the fidelity of tokenization
 by reconstructing text from tokens and comparing it to the original.
 """
 
-import logging
 
 from quacktokenscope.utils.tokenizers.base import BaseTokenizer
+from quackcore.logging import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 try:
     # Try to import Levenshtein for better distance calculation

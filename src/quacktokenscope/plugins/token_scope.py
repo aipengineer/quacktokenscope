@@ -195,6 +195,7 @@ class TokenScopePlugin(QuackToolPluginProtocol):
                 - upload: Whether to upload results to Google Drive
                 - dry_run: Don't upload results to Google Drive (default: False)
                 - verbose: Print detailed processing information (default: False)
+                - same_dir: Output results in the same directory as input file (default: False)
 
         Returns:
             IntegrationResult containing the token analysis result
@@ -399,6 +400,9 @@ class TokenScopePlugin(QuackToolPluginProtocol):
             # Determine output directory
             if output_path:
                 output_dir = Path(output_path)
+            elif options.get("same_dir", False):
+                # Use the same directory as the input file
+                output_dir = path.parent / f"{path.stem}_tokenscope"
             else:
                 # Create an output directory based on the input file name
                 stem = path.stem

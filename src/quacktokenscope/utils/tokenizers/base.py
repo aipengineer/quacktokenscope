@@ -9,7 +9,7 @@ implementations must follow.
 import logging
 from abc import ABC, abstractmethod
 from collections import Counter
-from typing import Any, ClassVar
+from typing import ClassVar
 
 
 class BaseTokenizer(ABC):

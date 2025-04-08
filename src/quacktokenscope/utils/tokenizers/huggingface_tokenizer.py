@@ -6,10 +6,10 @@ This module provides an implementation of the BaseTokenizer interface
 using HuggingFace's transformers library.
 """
 
-import logging
 from typing import ClassVar
 
 from quacktokenscope.utils.tokenizers.base import BaseTokenizer
+from quackcore.logging import get_logger
 
 
 class HuggingFaceTokenizer(BaseTokenizer):
@@ -30,7 +30,7 @@ class HuggingFaceTokenizer(BaseTokenizer):
         """Initialize the HuggingFace tokenizer."""
         super().__init__()
         self._tokenizer = None
-        self._logger = logging.getLogger(f"quacktokenscope.tokenizers.{self.name}")
+        self._logger = get_logger(f"quacktokenscope.tokenizers.{self.name}")
 
     def initialize(self) -> bool:
         """

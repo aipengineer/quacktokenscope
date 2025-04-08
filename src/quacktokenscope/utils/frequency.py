@@ -6,13 +6,13 @@ This module provides functions for analyzing token frequency
 in tokenized text.
 """
 
-import logging
 from collections import Counter
 
 from quacktokenscope.schemas.token_analysis import TokenFrequency
 from quacktokenscope.utils.tokenizers.base import BaseTokenizer
+from quackcore.logging import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def analyze_token_frequency(

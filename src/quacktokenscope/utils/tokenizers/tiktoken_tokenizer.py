@@ -6,10 +6,10 @@ This module provides an implementation of the BaseTokenizer interface
 using OpenAI's tiktoken library.
 """
 
-import logging
 from typing import ClassVar
 
 from quacktokenscope.utils.tokenizers.base import BaseTokenizer
+from quackcore.logging import get_logger
 
 
 class TiktokenTokenizer(BaseTokenizer):
@@ -30,7 +30,7 @@ class TiktokenTokenizer(BaseTokenizer):
         """Initialize the tiktoken tokenizer."""
         super().__init__()
         self._encoding = None
-        self._logger = logging.getLogger(f"quacktokenscope.tokenizers.{self.name}")
+        self._logger = get_logger(f"quacktokenscope.tokenizers.{self.name}")
 
     def initialize(self) -> bool:
         """
