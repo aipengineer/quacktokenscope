@@ -1,3 +1,4 @@
+# src/quacktokenscope/plugins/token_scope.py
 """
 QuackTokenScope plugin for token analysis.
 

@@ -1,3 +1,4 @@
+# src/quacktokenscope/education/cli/visualize.py
 """
 CLI handler for the visualization command.
 

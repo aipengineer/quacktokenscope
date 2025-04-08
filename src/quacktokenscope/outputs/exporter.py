@@ -1,3 +1,4 @@
+# src/quacktokenscope/outputs/exporter.py
 """
 Output exporters for QuackTokenScope.
 

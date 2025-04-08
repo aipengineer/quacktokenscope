@@ -6,12 +6,13 @@ This module provides an implementation of the BaseTokenizer interface
 using Google's SentencePiece library.
 """
 
-from pathlib import Path
 from typing import ClassVar
 
 from quacktokenscope import get_logger
 from quacktokenscope.utils.tokenizers.base import BaseTokenizer
 
+# Import the QuackCore FS service and helper functions.
+from quackcore.fs import service as fs, join_path
 
 class SentencePieceTokenizer(BaseTokenizer):
     """
@@ -42,7 +43,7 @@ class SentencePieceTokenizer(BaseTokenizer):
         or falls back to a simpler model if necessary.
 
         Returns:
-            True if initialization was successful, False otherwise
+            True if initialization was successful, False otherwise.
         """
         try:
             # First try to use transformers with T5 model (has SentencePiece built-in)
@@ -59,55 +60,58 @@ class SentencePieceTokenizer(BaseTokenizer):
                 # Fall back to direct SentencePiece implementation
                 import sentencepiece as spm
 
-                # Try to find an existing model or download a small pre-trained one
-                # For simplicity in this example, we'll use a model that might be
-                # cached by HuggingFace or create a very basic one
+                # Ensure the models directory exists using QuackCore FS.
+                models_dir_result = fs.create_directory("./models", exist_ok=True)
+                if not models_dir_result.success:
+                    self.logger.error(f"Failed to create models directory: {models_dir_result.error}")
+                    return False
+                models_dir = models_dir_result.path
 
-                # Check if we have a models directory
-                models_dir = Path("./models")
-                models_dir.mkdir(exist_ok=True, parents=True)
+                # Build the model path.
+                model_path = join_path(models_dir, "sentencepiece.model")
 
-                model_path = models_dir / "sentencepiece.model"
+                # Check if the model exists using fs.get_file_info.
+                model_info = fs.get_file_info(model_path)
+                if not (model_info.success and model_info.exists):
+                    self.logger.info("No SentencePiece model found, creating a simple one...")
 
-                if not model_path.exists():
-                    # If no model exists, try to create a very simple one from sample text
-                    self.logger.info(
-                        "No SentencePiece model found, creating a simple one...")
+                    # Create a temporary directory for training using fs.create_temp_directory.
+                    temp_dir_result = fs.create_temp_directory(prefix="quacktokenscope_spm_")
+                    if not temp_dir_result.success:
+                        self.logger.error(f"Failed to create temporary directory: {temp_dir_result.error}")
+                        return False
+                    self._temp_dir = temp_dir_result.path
 
-                    # Create a temporary directory for training
-                    import tempfile
-                    self._temp_dir = tempfile.mkdtemp(prefix="quacktokenscope_spm_")
+                    # Build the training file path and write sample text using fs.write_text.
+                    train_path = join_path(self._temp_dir, "train.txt")
+                    sample_text = (
+                        "This is a sample text for SentencePiece training.\n"
+                        "It contains some words and sentences to build a small model.\n"
+                        "The model will be very limited but sufficient for demonstration.\n"
+                    )
+                    write_result = fs.write_text(train_path, sample_text, encoding="utf-8", atomic=True)
+                    if not write_result.success:
+                        self.logger.error(f"Failed to write training file: {write_result.error}")
+                        return False
 
-                    # Create a simple text file for training
-                    train_path = Path(self._temp_dir) / "train.txt"
-                    with open(train_path, "w", encoding="utf-8") as f:
-                        f.write("This is a sample text for SentencePiece training.\n")
-                        f.write(
-                            "It contains some words and sentences to build a small model.\n")
-                        f.write(
-                            "The model will be very limited but sufficient for demonstration.\n")
-
-                    # Train a tiny model
+                    # Train a tiny model using SentencePieceTrainer.
                     spm.SentencePieceTrainer.train(
                         f"--input={train_path} "
-                        f"--model_prefix={models_dir}/sentencepiece "
+                        f"--model_prefix={str(models_dir)}/sentencepiece "
                         "--vocab_size=100 "
                         "--character_coverage=1.0 "
                         "--model_type=unigram"
                     )
 
-                # Load the model
+                # Load the model.
                 self._tokenizer = spm.SentencePieceProcessor()
                 self._tokenizer.load(str(model_path))
                 self._initialized = True
-                self.logger.info(
-                    f"Initialized {self.name} tokenizer using direct SentencePiece")
+                self.logger.info(f"Initialized {self.name} tokenizer using direct SentencePiece")
                 return True
 
         except ImportError:
-            self.logger.error(
-                "Failed to import sentencepiece. Please install it with 'pip install sentencepiece'"
-            )
+            self.logger.error("Failed to import sentencepiece. Please install it with 'pip install sentencepiece'")
             return False
         except Exception as e:
             self.logger.error(f"Failed to initialize SentencePiece tokenizer: {e}")
@@ -126,7 +130,7 @@ class SentencePieceTokenizer(BaseTokenizer):
         if not self._initialized:
             raise RuntimeError("Tokenizer not initialized")
 
-        # Check if we're using the T5Tokenizer or direct SentencePiece
+        # Check if we're using the T5Tokenizer or direct SentencePiece.
         if hasattr(self._tokenizer, "encode"):
             # T5Tokenizer
             token_ids = self._tokenizer.encode(text, add_special_tokens=False)
@@ -151,7 +155,6 @@ class SentencePieceTokenizer(BaseTokenizer):
         if not self._initialized:
             raise RuntimeError("Tokenizer not initialized")
 
-        # Check if we're using the T5Tokenizer or direct SentencePiece
         if hasattr(self._tokenizer, "decode"):
             # T5Tokenizer
             return self._tokenizer.decode(token_ids, skip_special_tokens=True)
@@ -169,7 +172,6 @@ class SentencePieceTokenizer(BaseTokenizer):
         if not self._initialized:
             raise RuntimeError("Tokenizer not initialized")
 
-        # Check if we're using the T5Tokenizer or direct SentencePiece
         if hasattr(self._tokenizer, "vocab_size"):
             # T5Tokenizer
             return self._tokenizer.vocab_size

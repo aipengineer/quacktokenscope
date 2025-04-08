@@ -1,3 +1,4 @@
+# src/quacktokenscope/education/cli/calculate_cost.py
 """
 CLI handler for the cost calculator command.
 

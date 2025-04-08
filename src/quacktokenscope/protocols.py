@@ -6,7 +6,6 @@ This module defines protocols that plugins must implement to be
 compatible with QuackCore and QuackTokenScope.
 """
 
-from collections.abc import Mapping, Sequence
 from logging import Logger
 from typing import Any, Protocol, runtime_checkable
 

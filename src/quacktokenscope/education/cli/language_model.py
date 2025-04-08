@@ -1,3 +1,4 @@
+# src/quacktokenscope/education/cli/language_model.py
 """
 CLI handler for the language model command.
 

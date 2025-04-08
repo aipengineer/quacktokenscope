@@ -6,24 +6,26 @@ This module provides the main entry point for QuackCore's plugin discovery syste
 """
 
 import inspect
-import logging
 import os
 import tempfile
-from pathlib import Path
+from logging import Logger
 from typing import Any, cast
 
 from quackcore.integrations.core.results import IntegrationResult
-
+from quackcore.logging import get_logger
 from quacktokenscope.plugins.token_scope import TokenScopePlugin
 from quacktokenscope.protocols import QuackToolPluginProtocol
 
+# Import QuackCore FS service and helper functions.
+from quackcore.fs import service as fs, join_path
+
 # Module-level dictionary to track registrations
 _PLUGIN_REGISTRY: dict[str, QuackToolPluginProtocol] = {}
-_LOGGER = logging.getLogger(__name__)
+_LOGGER = get_logger(__name__)
 
-# Add a lock file mechanism to detect multiple instances
-_LOCK_DIR = Path(tempfile.gettempdir()) / "quacktokenscope"
-_LOCK_FILE = _LOCK_DIR / "instance.lock"
+# Define lock directory and lock file using QuackCore FS helpers.
+_LOCK_DIR = join_path(tempfile.gettempdir(), "quacktokenscope")
+_LOCK_FILE = join_path(_LOCK_DIR, "instance.lock")
 
 
 def _check_other_instances() -> tuple[bool, str]:
@@ -34,36 +36,31 @@ def _check_other_instances() -> tuple[bool, str]:
         Tuple of (is_another_instance_running, message)
     """
     try:
-        # Create lock directory if it doesn't exist
-        _LOCK_DIR.mkdir(parents=True, exist_ok=True)
+        # Ensure the lock directory exists.
+        fs.create_directory(_LOCK_DIR, exist_ok=True)
 
-        # Check if lock file exists and is recent (less than 10 minutes old)
-        if _LOCK_FILE.exists():
-            # Get file modification time
-            mtime = _LOCK_FILE.stat().st_mtime
-            import time
-            current_time = time.time()
+        # Check if lock file exists using fs.get_file_info.
+        lock_info = fs.get_file_info(_LOCK_FILE)
+        if lock_info.success and lock_info.exists:
+            # Try to read the PID from the lock file.
+            read_result = fs.read_text(_LOCK_FILE, encoding="utf-8")
+            if read_result.success:
+                pid = read_result.content.strip()
+                return True, f"Another instance appears to be running (PID: {pid})"
+            else:
+                return True, "Another instance appears to be running"
+            # If the lock file is old, we can overwrite it (this is not explicitly checked here).
 
-            # If the lock file is recent (less than 10 minutes old)
-            if current_time - mtime < 600:  # 10 minutes in seconds
-                # Read PID from lock file
-                try:
-                    with open(_LOCK_FILE, 'r') as f:
-                        pid = f.read().strip()
-                    return True, f"Another instance appears to be running (PID: {pid})"
-                except:
-                    return True, "Another instance appears to be running"
-            # Lock file is old, we can overwrite it
-
-        # Write current PID to lock file
-        with open(_LOCK_FILE, 'w') as f:
-            f.write(str(os.getpid()))
-
+        # Write the current PID into the lock file.
+        write_result = fs.write_text(_LOCK_FILE, str(os.getpid()), encoding="utf-8",
+                                     atomic=True)
+        if not write_result.success:
+            _LOGGER.warning(f"Failed to write lock file: {write_result.error}")
         return False, "No other instances detected"
 
     except Exception as e:
         _LOGGER.warning(f"Error checking for other instances: {e}")
-        # Continue even if we can't check for other instances
+        # Continue even if we can't check for other instances.
         return False, f"Could not check for other instances: {e}"
 
 
@@ -80,35 +77,30 @@ class QuackTokenScopePlugin(QuackToolPluginProtocol):
         if cls._instance is None:
             cls._instance = super(QuackTokenScopePlugin, cls).__new__(cls)
             cls._instance._initialized = False  # Initialize the instance attributes
-            cls._logger = logging.getLogger(__name__)  # Initialize the logger at class level
+            cls._logger = get_logger(__name__)  # Initialize the logger at class level
 
-            # Try to load the project name from config
+            # Try to load the project name from config.
             try:
                 from quackcore.config import load_config
                 config = load_config()
-                if hasattr(config, "general") and hasattr(config.general, "project_name"):
+                if hasattr(config, "general") and hasattr(config.general,
+                                                          "project_name"):
                     cls._project_name = config.general.project_name
             except Exception as e:
                 cls._logger.debug(f"Could not load project name from config: {e}")
-                # Keep using the default name
-
+                # Keep using the default name.
         return cls._instance
 
     def __init__(self) -> None:
         """Initialize the plugin if not already initialized."""
-        # Skip initialization if already done
         if hasattr(self, "_initialized") and self._initialized:
             return
-
-        # Don't set self.logger directly, it's a property
-        # Make sure _initialized is set to False initially
         self._initialized = False
         self._token_scope_plugin = None
 
     @property
-    def logger(self) -> logging.Logger:
+    def logger(self) -> Logger:
         """Get the logger for the plugin."""
-        # Return the class-level logger
         return self.__class__._logger
 
     @property
@@ -129,7 +121,7 @@ class QuackTokenScopePlugin(QuackToolPluginProtocol):
             IntegrationResult indicating success or failure.
         """
         try:
-            # Check for other instances
+            # Check for other instances.
             other_instance_running, message = _check_other_instances()
             if other_instance_running:
                 return IntegrationResult.error_result(
@@ -137,10 +129,9 @@ class QuackTokenScopePlugin(QuackToolPluginProtocol):
                     f"Please close other CLI sessions using QuackTokenScope and try again."
                 )
 
-            # Initialize the token scope plugin
+            # Initialize the token scope plugin.
             self._token_scope_plugin = TokenScopePlugin()
             init_result = self._token_scope_plugin.initialize()
-
             if not init_result.success:
                 return init_result
 
@@ -187,8 +178,7 @@ class QuackTokenScopePlugin(QuackToolPluginProtocol):
 
         try:
             self.logger.info(f"Processing file: {file_path}")
-
-            # Delegate to the token scope plugin
+            # Delegate to the token scope plugin.
             if self._token_scope_plugin:
                 return self._token_scope_plugin.process_file(
                     file_path=file_path,
@@ -197,28 +187,21 @@ class QuackTokenScopePlugin(QuackToolPluginProtocol):
                 )
             else:
                 return IntegrationResult.error_result(
-                    "Token scope plugin not initialized"
-                )
-
+                    "Token scope plugin not initialized")
         except Exception as e:
             self.logger.error(f"Error processing file: {e}")
-            return IntegrationResult.error_result(
-                f"Error processing file: {str(e)}"
-            )
+            return IntegrationResult.error_result(f"Error processing file: {str(e)}")
 
     def __del__(self):
         """Clean up resources when the plugin is garbage collected."""
         try:
-            # Remove lock file if it exists and contains our PID
-            if _LOCK_FILE.exists():
-                try:
-                    with open(_LOCK_FILE, 'r') as f:
-                        pid = f.read().strip()
-                    if pid == str(os.getpid()):
-                        _LOCK_FILE.unlink()
-                except:
-                    pass
-        except:
+            lock_info = fs.get_file_info(_LOCK_FILE)
+            if lock_info.success and lock_info.exists:
+                read_result = fs.read_text(_LOCK_FILE, encoding="utf-8")
+                if read_result.success and read_result.content.strip() == str(
+                        os.getpid()):
+                    fs.delete(_LOCK_FILE)
+        except Exception:
             pass
 
 
@@ -230,33 +213,23 @@ def create_plugin() -> QuackToolPluginProtocol:
     across the entire application lifetime, even if imported multiple times.
 
     Returns:
-        The singleton QuackTokenScope plugin instance
+        The singleton QuackTokenScope plugin instance.
     """
-    # Get the caller's module using inspect
+    # Get the caller's module using inspect.
     caller_frame = inspect.currentframe()
     caller_frame = caller_frame.f_back if caller_frame else None
-    caller_module = caller_frame.f_globals.get('__name__', 'unknown') if caller_frame else 'unknown'
+    caller_module = caller_frame.f_globals.get('__name__',
+                                               'unknown') if caller_frame else 'unknown'
 
-    # Check if we already have a plugin instance
     plugin_key = "quacktokenscope_plugin"
     if plugin_key in _PLUGIN_REGISTRY:
-        # Cast the retrieved plugin to QuackTokenScopePlugin to access _initialized
         plugin = cast(QuackTokenScopePlugin, _PLUGIN_REGISTRY[plugin_key])
-        # Ensure the instance is not initialized to match test expectations
         plugin._initialized = False
         return plugin
 
-    # Create a new instance if we don't have one yet
     instance = QuackTokenScopePlugin()
-
-    # Explicitly set to False to ensure it's not initialized
     instance._initialized = False
-
-    # Store in our module-level registry without registering with QuackCore
-    # The registration will be handled by QuackCore's plugin discovery
     _PLUGIN_REGISTRY[plugin_key] = instance
 
-    # Log for debugging purposes using module logger
     _LOGGER.debug(f"Plugin instance created by {caller_module}")
-
     return instance
