@@ -6,13 +6,14 @@ This module provides functions for calculating and displaying the cost
 of using tokens with various language model APIs.
 """
 
-import logging
 from typing import Any
 
 from rich.console import Console
 from rich.table import Table
 
-logger = logging.getLogger(__name__)
+from quacktokenscope import get_logger
+
+logger = get_logger(__name__)
 
 # Default pricing models (per 1K tokens)
 DEFAULT_PRICING_MODELS = {

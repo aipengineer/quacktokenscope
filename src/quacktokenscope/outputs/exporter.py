@@ -7,16 +7,16 @@ to various formats (Excel, JSON, CSV).
 """
 
 import json
-import logging
 from pathlib import Path
 
+from quacktokenscope import get_logger
 from quacktokenscope.schemas.token_analysis import (
     TokenAnalysis,
     TokenFrequency,
     TokenSummary,
 )
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def export_to_json(

@@ -1,11 +1,8 @@
-# src/quacktokenscope/education/cli/language_model.py
 """
 CLI handler for the language model command.
 
 This module contains the handler function for the language model CLI command.
 """
-
-from pathlib import Path
 
 import click
 from quackcore.cli import print_error, print_info
@@ -19,18 +16,20 @@ from quacktokenscope.education.language_model import (
     display_tokenizer_predictions,
     display_text_generation,
 )
+# Use the quackcore.fs service for file operations.
+from quackcore.fs import service as fs
 
 logger = get_logger(__name__)
 
 
 def handle_language_model_command(
-        ctx: click.Context,
-        input_text: str,
-        train: str | None = None,
-        tokenizer: str = "tiktoken",
-        ngram: int = 2,
-        predict_only: bool = False,
-        compare_tokenizers: bool = False,
+    ctx: click.Context,
+    input_text: str,
+    train: str | None = None,
+    tokenizer: str = "tiktoken",
+    ngram: int = 2,
+    predict_only: bool = False,
+    compare_tokenizers: bool = False,
 ) -> None:
     """
     Handle the language model command.
@@ -46,60 +45,58 @@ def handle_language_model_command(
     """
     console = Console()
 
-    # Check if input is a file path
-    input_path = Path(input_text)
-    if input_path.exists() and input_path.is_file():
-        try:
-            with open(input_path, "r", encoding="utf-8") as f:
-                input_text = f.read()
-            print_info(f"Read input from file: {input_path}")
-        except Exception as e:
-            print_error(f"Failed to read file: {e}", exit_code=1)
+    # Check if input_text represents a file path.
+    input_file = input_text
+    file_info = fs.get_file_info(input_file)
+    if file_info.success and file_info.exists and file_info.is_file:
+        read_result = fs.read_text(input_file, encoding="utf-8")
+        if not read_result.success:
+            print_error(f"Failed to read file: {read_result.error}", exit_code=1)
             return
+        input_text = read_result.content
+        print_info(f"Read input from file: {input_file}")
 
-    # Check if training corpus is a file path
+    # Check if the training corpus is a file path.
     training_text = ""
     if train:
-        train_path = Path(train)
-        if train_path.exists() and train_path.is_file():
-            try:
-                with open(train_path, "r", encoding="utf-8") as f:
-                    training_text = f.read()
-                print_info(f"Read training corpus from file: {train_path}")
-            except Exception as e:
-                print_error(f"Failed to read training file: {e}", exit_code=1)
+        train_file = train
+        train_info = fs.get_file_info(train_file)
+        if train_info.success and train_info.exists and train_info.is_file:
+            read_train = fs.read_text(train_file, encoding="utf-8")
+            if not read_train.success:
+                print_error(f"Failed to read training file: {read_train.error}", exit_code=1)
                 return
+            training_text = read_train.content
+            print_info(f"Read training corpus from file: {train_file}")
         else:
             training_text = train
     else:
         # Default training corpus
-        training_text = """
-        The quick brown fox jumps over the lazy dog. The dog sleeps peacefully under the tree.
-        Tokenization is the process of splitting text into tokens. Tokens are the building blocks of language models.
-        Different tokenizers use different strategies to split text. Some use whitespace, others use subword units.
-        Understanding tokenization helps optimize prompts and reduce API costs for large language models.
-        """
+        training_text = (
+            "The quick brown fox jumps over the lazy dog. The dog sleeps peacefully under the tree.\n"
+            "Tokenization is the process of splitting text into tokens. Tokens are the building blocks of language models.\n"
+            "Different tokenizers use different strategies to split text. Some use whitespace, others use subword units.\n"
+            "Understanding tokenization helps optimize prompts and reduce API costs for large language models.\n"
+        )
         print_info("Using default training corpus")
 
-    # Create and initialize the token scope plugin to get tokenizers
+    # Create and initialize the token scope plugin to get tokenizers.
     plugin = TokenScopePlugin()
     init_result = plugin.initialize()
-
     if not init_result.success:
-        print_error(f"Failed to initialize tokenscope plugin: {init_result.error}",
-                    exit_code=1)
+        print_error(f"Failed to initialize tokenscope plugin: {init_result.error}", exit_code=1)
         return
 
-    # Get available tokenizers
+    # Get available tokenizers.
     available_tokenizers = plugin._tokenizers
-
     if tokenizer not in available_tokenizers:
         print_error(
             f"Tokenizer '{tokenizer}' not found. Available tokenizers: {', '.join(available_tokenizers.keys())}",
-            exit_code=1)
+            exit_code=1
+        )
         return
 
-    # Compare different tokenizers if requested
+    # Compare different tokenizers if requested.
     if compare_tokenizers:
         predictions = compare_tokenizer_predictions(
             input_text,
@@ -107,40 +104,27 @@ def handle_language_model_command(
             available_tokenizers,
             n=ngram
         )
-
-        console.print(display_tokenizer_predictions(
-            input_text,
-            predictions,
-            console
-        ))
+        console.print(display_tokenizer_predictions(input_text, predictions, console))
     else:
-        # Use a single tokenizer
+        # Use a single tokenizer.
         tokenizer_instance = available_tokenizers[tokenizer]
 
-        # Create and train the model
+        # Create and train the model.
         model = SimpleLanguageModel(
             tokenizer_instance,
             n=ngram,
             name=f"Quack-{tokenizer.capitalize()}-{ngram}gram"
         )
-
         model.train(training_text)
 
-        # Show next token predictions
+        # Show next token predictions.
         predictions = model.predict_next(input_text, num_predictions=5)
-
         console.print(f"[bold]Input:[/bold] {input_text}")
-        console.print(
-            f"[bold]Model:[/bold] {model.name} ({ngram}-gram using {tokenizer})")
-
+        console.print(f"[bold]Model:[/bold] {model.name} ({ngram}-gram using {tokenizer})")
         console.print("\n[bold]Top 5 next token predictions:[/bold]")
         for i, (token, prob) in enumerate(predictions):
             console.print(f"{i + 1}. '{token}' ({prob:.2%})")
 
-        # Show text generation unless predict-only flag is set
+        # Show text generation unless predict-only flag is set.
         if not predict_only:
-            console.print(display_text_generation(
-                input_text,
-                model,
-                console
-            ))
+            console.print(display_text_generation(input_text, model, console))

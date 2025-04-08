@@ -6,13 +6,13 @@ This module provides a simple n-gram language model implementation
 to demonstrate how tokenization affects language modeling.
 """
 
-import logging
 from collections import Counter, defaultdict
 from typing import Any
 
+from quacktokenscope import get_logger
 from quacktokenscope.utils.tokenizers.base import BaseTokenizer
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class SimpleLanguageModel:

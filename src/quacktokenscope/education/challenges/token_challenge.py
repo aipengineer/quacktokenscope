@@ -6,14 +6,14 @@ This module contains the logic for the token guessing challenge game,
 where users guess which tokenizer will use the fewest tokens for a given text.
 """
 
-import logging
-from typing import Dict, List, Any, Optional
+from typing import  Any
 
 from rich.console import Console
 
+from quacktokenscope import get_logger
 from quacktokenscope.education.visualization import guild_challenge
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Challenge texts of increasing difficulty
 CHALLENGE_TEXTS = [
@@ -35,10 +35,10 @@ EDUCATIONAL_INSIGHTS = [
 
 
 def run_challenge(
-        tokenizers: Dict[str, Any],
-        console: Optional[Console] = None,
-        custom_texts: Optional[List[str]] = None
-) -> Dict[str, Any]:
+        tokenizers: dict[str, Any],
+        console: Console | None = None,
+        custom_texts: list[str] | None = None
+) -> dict[str, Any]:
     """
     Run the token challenge game.
 

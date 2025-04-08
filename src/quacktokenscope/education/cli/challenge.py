@@ -5,19 +5,19 @@ CLI handler for the token challenge command.
 This module contains the handler function for the token challenge CLI command.
 """
 
-import logging
 
 import click
 from quackcore.cli import print_error, print_info
 from rich.console import Console
 from rich.prompt import Prompt
 
+from quacktokenscope import get_logger
 from quacktokenscope.plugins.token_scope import TokenScopePlugin
 from quacktokenscope.education.challenges.token_challenge import (
     run_challenge, EDUCATIONAL_INSIGHTS
 )
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def handle_challenge_command(ctx: click.Context) -> None:

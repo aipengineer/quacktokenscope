@@ -7,7 +7,7 @@ This module contains the handler function for the tutorial CLI command.
 
 
 import click
-from quackcore.cli import print_error, print_info
+from quackcore.cli import print_error
 from rich.console import Console
 
 from quacktokenscope.plugins.token_scope import TokenScopePlugin

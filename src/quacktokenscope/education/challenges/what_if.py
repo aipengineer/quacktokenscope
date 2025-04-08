@@ -7,15 +7,15 @@ affect tokenization and API costs.
 """
 
 import re
-import logging
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Any
 
 from rich.console import Console
 from rich.table import Table
 
+from quacktokenscope import get_logger
 from quacktokenscope.education.cost_calculator import calculate_cost
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Standard text modifications for what-if analysis
 STANDARD_MODIFICATIONS = [
@@ -31,9 +31,9 @@ def run_what_if_analysis(
         text: str,
         tokenizer: Any,
         model: str = "gpt-4-turbo",
-        console: Optional[Console] = None,
-        custom_modifications: Optional[List[Tuple[str, callable]]] = None
-) -> Dict[str, Any]:
+        console: Console | None = None,
+        custom_modifications: list[tuple[str, callable]] | None  = None
+) -> dict[str, Any]:
     """
     Run a what-if analysis on text modifications.
 
@@ -118,8 +118,8 @@ def run_what_if_analysis(
     }
 
 
-def display_what_if_results(analysis: Dict[str, Any],
-                            console: Optional[Console] = None) -> str:
+def display_what_if_results(analysis: dict[str, Any],
+                            console: Console| None  = None) -> str:
     """
     Display what-if analysis results in a formatted table.
 
