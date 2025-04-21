@@ -19,7 +19,9 @@ from quacktokenscope.education.visualization import (
 )
 from quackcore.logging import get_logger
 # Use the quackcore.fs service for file operations.
-from quackcore.fs import service as fs
+from quackcore.fs.service import get_service
+
+fs = get_service()
 
 logger = get_logger(__name__)
 

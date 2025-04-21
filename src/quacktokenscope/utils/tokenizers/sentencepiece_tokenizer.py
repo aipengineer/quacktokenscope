@@ -8,11 +8,13 @@ using Google's SentencePiece library.
 
 from typing import ClassVar
 
-from quacktokenscope import get_logger
+from quackcore.logging import get_logger
 from quacktokenscope.utils.tokenizers.base import BaseTokenizer
 
 # Import the QuackCore FS service and helper functions.
-from quackcore.fs import service as fs
+from quackcore.fs.service import get_service
+
+fs = get_service()
 
 class SentencePieceTokenizer(BaseTokenizer):
     """

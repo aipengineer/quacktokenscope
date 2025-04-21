@@ -14,7 +14,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from quacktokenscope import get_logger
+from quackcore.logging import get_logger
 from quacktokenscope.utils.tokenizers.base import BaseTokenizer
 
 logger = get_logger(__name__)

@@ -9,7 +9,7 @@ to various formats (Excel, JSON, CSV).
 import json
 
 # Remove direct Path use – we now rely on quackcore.fs for file operations.
-from quacktokenscope import get_logger
+from quackcore.logging import get_logger
 from quacktokenscope.schemas.token_analysis import (
     TokenAnalysis,
     TokenFrequency,
@@ -19,7 +19,9 @@ from quacktokenscope.schemas.token_analysis import (
 logger = get_logger(__name__)
 
 # Import the quackcore.fs service and its utility functions.
-from quackcore.fs import service as fs
+from quackcore.fs.service import get_service
+
+fs = get_service()
 
 
 def export_to_json(
@@ -165,7 +167,7 @@ def export_to_csv(
     """
     try:
         # Ensure parent directories exist.
-        parent_dir = join_path(*split_path(str(output_path))[:-1])
+        parent_dir = fs.join_path(*fs.split_path(str(output_path))[:-1])
         fs.create_directory(parent_dir, exist_ok=True)
 
         # Import pandas here to avoid it being a required dependency.
@@ -248,38 +250,38 @@ def export_results(
 
     # Export to Excel.
     if all_formats or format_type == "excel":
-        excel_path = join_path(str(output_dir), f"{file_stem}.xlsx")
+        excel_path = fs.join_path(str(output_dir), f"{file_stem}.xlsx")
         if export_to_excel(analysis, frequencies, summary, excel_path):
             exported_files["excel"] = str(excel_path)
 
     # Export to JSON.
     if all_formats or format_type == "json":
         # Export analysis.
-        analysis_path = join_path(str(output_dir), f"{file_stem}.json")
+        analysis_path = fs.join_path(str(output_dir), f"{file_stem}.json")
         if export_to_json(analysis, analysis_path):
             exported_files["json_analysis"] = str(analysis_path)
 
         # Export summary.
-        summary_path = join_path(str(output_dir), f"{file_stem}_summary.json")
+        summary_path = fs.join_path(str(output_dir), f"{file_stem}_summary.json")
         if export_to_json(summary, summary_path):
             exported_files["json_summary"] = str(summary_path)
 
         # Export frequencies (one file per tokenizer).
         for tokenizer_name, freq in frequencies.items():
-            freq_path = join_path(str(output_dir), f"{file_stem}_{tokenizer_name}_frequency.json")
+            freq_path = fs.join_path(str(output_dir), f"{file_stem}_{tokenizer_name}_frequency.json")
             if export_to_json(freq, freq_path):
                 exported_files[f"json_freq_{tokenizer_name}"] = str(freq_path)
 
     # Export to CSV.
     if all_formats or format_type == "csv":
         # Export token table.
-        table_path = join_path(str(output_dir), f"{file_stem}_token_table.csv")
+        table_path = fs.join_path(str(output_dir), f"{file_stem}_token_table.csv")
         if export_to_csv(analysis, table_path):
             exported_files["csv_table"] = str(table_path)
 
         # Export frequencies (one file per tokenizer).
         for tokenizer_name, freq in frequencies.items():
-            freq_path = join_path(str(output_dir), f"{file_stem}_{tokenizer_name}_frequency.csv")
+            freq_path = fs.join_path(str(output_dir), f"{file_stem}_{tokenizer_name}_frequency.csv")
             if export_to_csv(freq, freq_path):
                 exported_files[f"csv_freq_{tokenizer_name}"] = str(freq_path)
 

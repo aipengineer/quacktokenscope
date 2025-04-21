@@ -29,7 +29,9 @@ from quacktokenscope.utils.reverse_mapping import evaluate_reconstruction
 from quacktokenscope.utils.tokenizers import TOKENIZER_REGISTRY, BaseTokenizer
 
 # Import the FS service and helper functions from quackcore.fs
-from quackcore.fs import service as fs
+from quackcore.fs.service import get_service
+
+fs = get_service()
 
 logger = get_logger(__name__)
 

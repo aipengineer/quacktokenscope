@@ -14,20 +14,18 @@ logger = get_logger(__name__)
 from quacktokenscope.version import __version__
 
 # Import lazily-loaded modules directly
-from quacktokenscope.config import get_config, get_logger
 from quacktokenscope.plugins.token_scope import TokenScopePlugin
 from quacktokenscope.schemas.token_analysis import TokenAnalysis, TokenFrequency, TokenSummary
 
 # Import the QuackCore FS service to handle directory operations
-from quackcore.fs import service as fs
+from quackcore.fs.service import get_service
+
+fs = get_service()
 
 # Define what this package exposes
 __all__ = [
     # Version
     "__version__",
-    # Config
-    "get_config",
-    "get_logger",
     # Tokenscope functionality
     "TokenScopePlugin",
     "TokenAnalysis",

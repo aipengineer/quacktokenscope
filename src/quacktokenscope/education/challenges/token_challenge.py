@@ -10,7 +10,7 @@ from typing import  Any
 
 from rich.console import Console
 
-from quacktokenscope import get_logger
+from quackcore.logging import get_logger
 from quacktokenscope.education.visualization import guild_challenge
 
 logger = get_logger(__name__)

@@ -12,7 +12,7 @@ from collections import Counter
 from logging import Logger
 from typing import ClassVar
 
-from quacktokenscope import get_logger
+from quackcore.logging import get_logger
 
 
 class BaseTokenizer(ABC):

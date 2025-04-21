@@ -12,7 +12,7 @@ from typing import Any
 from rich.console import Console
 from rich.table import Table
 
-from quacktokenscope import get_logger
+from quackcore.logging import get_logger
 from quacktokenscope.education.cost_calculator import calculate_cost
 
 logger = get_logger(__name__)

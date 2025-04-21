@@ -13,11 +13,15 @@ from typing import Any, cast
 
 from quackcore.integrations.core.results import IntegrationResult
 from quackcore.logging import get_logger
+from quackcore.plugins.protocols import QuackPluginMetadata
+
 from quacktokenscope.plugins.token_scope import TokenScopePlugin
 from quacktokenscope.protocols import QuackToolPluginProtocol
 
 # Import QuackCore FS service and helper functions.
-from quackcore.fs import service as fs
+from quackcore.fs.service import get_service
+
+fs = get_service()
 
 # Module-level dictionary to track registrations
 _PLUGIN_REGISTRY: dict[str, QuackToolPluginProtocol] = {}
@@ -112,6 +116,25 @@ class QuackTokenScopePlugin(QuackToolPluginProtocol):
     def version(self) -> str:
         """Return the plugin version."""
         return "0.1.0"
+
+    def get_metadata(self) -> QuackPluginMetadata:
+        """
+        Get metadata for the plugin.
+
+        Returns:
+            QuackPluginMetadata: Plugin metadata.
+        """
+        return QuackPluginMetadata(
+            name=self.name,
+            version=self.version,
+            description="QuackTokenscope plugin for counting tokens from documents",
+            author="AI Product Engineer Team",
+            capabilities=[
+                "token counting",
+                "LLM-based extraction",
+                "upload file",
+            ],
+        )
 
     def initialize(self) -> IntegrationResult:
         """

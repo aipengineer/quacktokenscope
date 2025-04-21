@@ -11,7 +11,7 @@ from quackcore.cli import print_error, print_info
 from rich.console import Console
 from rich.prompt import Prompt
 
-from quacktokenscope import get_logger
+from quackcore.logging import get_logger
 from quacktokenscope.plugins.token_scope import TokenScopePlugin
 from quacktokenscope.education.challenges.token_challenge import (
     run_challenge, EDUCATIONAL_INSIGHTS

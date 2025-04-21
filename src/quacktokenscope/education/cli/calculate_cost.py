@@ -10,7 +10,7 @@ from quackcore.cli import print_error, print_info
 from rich.console import Console
 from rich.table import Table
 
-from quacktokenscope import get_logger
+from quackcore.logging import get_logger
 from quacktokenscope.plugins.token_scope import TokenScopePlugin
 from quacktokenscope.education.cost_calculator import (
     display_cost_summary,
@@ -21,7 +21,9 @@ from quacktokenscope.education.challenges.what_if import (
     display_what_if_results,
 )
 # Use the quackcore.fs service for filesystem operations.
-from quackcore.fs import service as fs
+from quackcore.fs.service import get_service
+
+fs = get_service()
 
 logger = get_logger(__name__)
 

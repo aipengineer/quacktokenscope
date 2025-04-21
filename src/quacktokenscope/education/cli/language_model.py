@@ -9,7 +9,7 @@ import click
 from quackcore.cli import print_error, print_info
 from rich.console import Console
 
-from quacktokenscope import get_logger
+from quackcore.logging import get_logger
 from quacktokenscope.plugins.token_scope import TokenScopePlugin
 from quacktokenscope.education.language_model import (
     SimpleLanguageModel,
@@ -18,7 +18,9 @@ from quacktokenscope.education.language_model import (
     display_text_generation,
 )
 # Use the quackcore.fs service for file operations.
-from quackcore.fs import service as fs
+from quackcore.fs.service import get_service
+
+fs = get_service()
 
 logger = get_logger(__name__)
 

@@ -9,7 +9,7 @@ to demonstrate how tokenization affects language modeling.
 from collections import Counter, defaultdict
 from typing import Any
 
-from quacktokenscope import get_logger
+from quackcore.logging import get_logger
 from quacktokenscope.utils.tokenizers.base import BaseTokenizer
 
 logger = get_logger(__name__)

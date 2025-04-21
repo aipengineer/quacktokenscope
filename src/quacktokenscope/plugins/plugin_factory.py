@@ -8,7 +8,7 @@ that can be discovered by QuackCore's plugin system.
 
 from typing import cast
 
-from quacktokenscope import get_logger
+from quackcore.logging import get_logger
 from quacktokenscope.plugins.token_scope import TokenScopePlugin
 from quacktokenscope.protocols import QuackToolPluginProtocol
 
