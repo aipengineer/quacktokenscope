@@ -12,7 +12,7 @@ from quacktokenscope import get_logger
 from quacktokenscope.utils.tokenizers.base import BaseTokenizer
 
 # Import the QuackCore FS service and helper functions.
-from quackcore.fs import service as fs, join_path
+from quackcore.fs import service as fs
 
 class SentencePieceTokenizer(BaseTokenizer):
     """
@@ -68,7 +68,7 @@ class SentencePieceTokenizer(BaseTokenizer):
                 models_dir = models_dir_result.path
 
                 # Build the model path.
-                model_path = join_path(models_dir, "sentencepiece.model")
+                model_path = fs.join_path(models_dir, "sentencepiece.model")
 
                 # Check if the model exists using fs.get_file_info.
                 model_info = fs.get_file_info(model_path)
@@ -83,7 +83,7 @@ class SentencePieceTokenizer(BaseTokenizer):
                     self._temp_dir = temp_dir_result.path
 
                     # Build the training file path and write sample text using fs.write_text.
-                    train_path = join_path(self._temp_dir, "train.txt")
+                    train_path = fs.join_path(self._temp_dir, "train.txt")
                     sample_text = (
                         "This is a sample text for SentencePiece training.\n"
                         "It contains some words and sentences to build a small model.\n"

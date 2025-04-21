@@ -10,7 +10,7 @@ PYTHON_VERSION := 3.13
 VENV_NAME := .venv
 PYTHON := $(CURDIR)/$(VENV_NAME)/bin/python
 PROJECT_NAME := quacktool
-QUACKCORE_PATH ?= ../quackcore
+QUACKCORE_PATH ?= ../quackverse/quackcore
 
 # Test settings
 TEST_PATH := tests/

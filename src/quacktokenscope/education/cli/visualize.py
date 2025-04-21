@@ -20,7 +20,6 @@ from quacktokenscope.education.visualization import (
 from quackcore.logging import get_logger
 # Use the quackcore.fs service for file operations.
 from quackcore.fs import service as fs
-from quackcore.fs import split_path, join_path
 
 logger = get_logger(__name__)
 
@@ -126,8 +125,8 @@ def handle_visualize_command(
     if export:
         try:
             # Determine the parent directory using fs.split_path and fs.join_path.
-            parts = split_path(export)
-            parent_dir = join_path(*parts[:-1])
+            parts = fs.split_path(export)
+            parent_dir = fs.join_path(*parts[:-1])
             # Ensure the parent directory exists.
             fs.create_directory(parent_dir, exist_ok=True)
             # Export the visualization text to the file.

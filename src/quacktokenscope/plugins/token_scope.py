@@ -29,7 +29,7 @@ from quacktokenscope.utils.reverse_mapping import evaluate_reconstruction
 from quacktokenscope.utils.tokenizers import TOKENIZER_REGISTRY, BaseTokenizer
 
 # Import the FS service and helper functions from quackcore.fs
-from quackcore.fs import service as fs, join_path, split_path
+from quackcore.fs import service as fs
 
 logger = get_logger(__name__)
 
@@ -390,7 +390,7 @@ class TokenScopePlugin(QuackToolPluginProtocol):
             )
 
             # Compute stem from the file name unconditionally.
-            parts = split_path(file_path)
+            parts = fs.split_path(file_path)
             file_name = parts[-1]
             stem = file_name.rsplit('.', 1)[0]
 
@@ -398,10 +398,10 @@ class TokenScopePlugin(QuackToolPluginProtocol):
             if output_path:
                 out_dir = output_path
             elif options.get("same_dir", False):
-                parent_dir = join_path(*parts[:-1])
-                out_dir = join_path(parent_dir, f"{stem}_tokenscope")
+                parent_dir = fs.join_path(*parts[:-1])
+                out_dir = fs.join_path(parent_dir, f"{stem}_tokenscope")
             else:
-                out_dir = join_path(self._output_dir, stem)
+                out_dir = fs.join_path(self._output_dir, stem)
 
             # Ensure the output directory exists.
             fs.create_directory(out_dir, exist_ok=True)

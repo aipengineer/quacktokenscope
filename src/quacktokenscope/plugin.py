@@ -17,15 +17,15 @@ from quacktokenscope.plugins.token_scope import TokenScopePlugin
 from quacktokenscope.protocols import QuackToolPluginProtocol
 
 # Import QuackCore FS service and helper functions.
-from quackcore.fs import service as fs, join_path
+from quackcore.fs import service as fs
 
 # Module-level dictionary to track registrations
 _PLUGIN_REGISTRY: dict[str, QuackToolPluginProtocol] = {}
 _LOGGER = get_logger(__name__)
 
 # Define lock directory and lock file using QuackCore FS helpers.
-_LOCK_DIR = join_path(tempfile.gettempdir(), "quacktokenscope")
-_LOCK_FILE = join_path(_LOCK_DIR, "instance.lock")
+_LOCK_DIR = fs.join_path(tempfile.gettempdir(), "quacktokenscope")
+_LOCK_FILE = fs.join_path(_LOCK_DIR, "instance.lock")
 
 
 def _check_other_instances() -> tuple[bool, str]:

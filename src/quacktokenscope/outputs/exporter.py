@@ -19,7 +19,7 @@ from quacktokenscope.schemas.token_analysis import (
 logger = get_logger(__name__)
 
 # Import the quackcore.fs service and its utility functions.
-from quackcore.fs import service as fs, split_path, join_path
+from quackcore.fs import service as fs
 
 
 def export_to_json(
@@ -38,7 +38,7 @@ def export_to_json(
     try:
         # Create parent directories if they don't exist.
         # Use fs.split_path and fs.join_path to get the parent directory.
-        parent_dir = join_path(*split_path(str(output_path))[:-1])
+        parent_dir = fs.join_path(*fs.split_path(str(output_path))[:-1])
         fs.create_directory(parent_dir, exist_ok=True)
 
         # Convert data to a dictionary and dump to a JSON string.
@@ -77,7 +77,7 @@ def export_to_excel(
     """
     try:
         # Ensure parent directories exist.
-        parent_dir = join_path(*split_path(str(output_path))[:-1])
+        parent_dir = fs.join_path(*fs.split_path(str(output_path))[:-1])
         fs.create_directory(parent_dir, exist_ok=True)
 
         # Import pandas here to avoid it being a required dependency.

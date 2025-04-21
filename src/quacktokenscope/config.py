@@ -17,7 +17,7 @@ from quackcore.config.models import QuackConfig
 from quackcore.logging import get_logger
 
 # Import QuackCore FS service and helper functions.
-from quackcore.fs import service as fs, join_path
+from quackcore.fs import service as fs
 
 # Keep track of open file handlers to ensure they get closed
 _file_handlers: list[logging.FileHandler] = []
@@ -151,7 +151,7 @@ def initialize_config(config_path: str | None = None) -> QuackConfig:
     fs.create_directory(logs_dir, exist_ok=True)
 
     try:
-        log_file = join_path(logs_dir, "quacktokenscope.log")
+        log_file = fs.join_path(logs_dir, "quacktokenscope.log")
         file_handler = logging.FileHandler(str(log_file), mode="a")
         file_handler.setLevel(log_level)
         root_logger.addHandler(file_handler)
