@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 license = { text = "GNU GPL" }
 authors = [
-    { name = "Your Name", email = "your.email@example.com" }
+    { name = "Rod Rivera", email = "rod@aip.engineer" }
 ]
 keywords = [
     "tokenizers",
@@ -51,8 +51,8 @@ dev = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/aipengineer/quacktokenscope"
-"Bug Tracker" = "https://github.com/aipengineer/quacktokenscope/issues"
+"Homepage" = "https://github.com/ducktyper-ai/quacktokenscope"
+"Bug Tracker" = "https://github.com/ducktyper-ai/quacktokenscope/issues"
 
 [project.scripts]
 quacktool = "quacktokenscope.cli:main"
